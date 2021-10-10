@@ -1,0 +1,8 @@
+name: Tags
+version: 1.04
+main: self.liltinyten.tags.Main
+authors: [ liltinyten ]
+description: Allows you to set tags!
+commands:
+  tags:
+    description: Opens the tags menu!
