@@ -37,7 +37,7 @@ public class Main extends JavaPlugin {
     public File PlayerTags = new File(this.getDataFolder() + "/playertags.yml");
     public FileConfiguration tagsyml = YamlConfiguration.loadConfiguration(PlayerTags);
 
-    // Database Settings
+    // Database Settings (CLEANUP)
     public File dbsettings = new File(this.getDataFolder() + "/database.yml");
     public FileConfiguration dbyml = YamlConfiguration.loadConfiguration(dbsettings);
 
@@ -49,6 +49,7 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        // CLEANUP
         setupChat();
         System.out.println("[TAGS] - ENABLED");
         getServer().getPluginManager().registerEvents(new TagsMenuHandler(), this);
@@ -75,6 +76,7 @@ public class Main extends JavaPlugin {
 
         mainclass = this;
         // Database stuff
+        // CLEANUP
         if (dbyml.getBoolean("usedatabase")) {
             System.out.println("[TAGS] - Trying database connection...");
             host = dbyml.getString("host");
