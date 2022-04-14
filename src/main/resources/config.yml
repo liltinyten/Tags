@@ -1,5 +1,2 @@
-tags:
-  - "Test1"
-  - "Test2"
-Test1: "&b&lWorldWide!"
-Test2: "&a&lResearcher"
+#Prefix or Suffix, if false tag will display as a suffix otherwise it will display as a prefix
+prefix: false

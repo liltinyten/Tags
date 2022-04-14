@@ -30,7 +30,7 @@ public class TagsMenuHandler implements Listener {
                                     Main.getMainClass().tagsyml.set(player.getUniqueId().toString(), lores.get(0));
                                     Main.getMainClass().saveYml(Main.getMainClass().tagsyml, Main.getMainClass().PlayerTags);
                                     player.sendMessage(ChatColor.GREEN + "Successfully set tag!");
-                                    String suffix = ChatColor.translateAlternateColorCodes('&', "&r"+Main.getMainClass().getConfig().getString(Main.getMainClass().tagsyml.getString(player.getUniqueId().toString())));
+                                    String suffix = ChatColor.translateAlternateColorCodes('&', "&r"+Main.getMainClass().tagListYML.getString(Main.getMainClass().tagsyml.getString(player.getUniqueId().toString())));
                                     Main.getChat().setPlayerSuffix(player, suffix);
                                     player.closeInventory();
                                 } else {

@@ -37,6 +37,10 @@ public class Main extends JavaPlugin {
     public File PlayerTags = new File(this.getDataFolder() + "/playertags.yml");
     public FileConfiguration tagsyml = YamlConfiguration.loadConfiguration(PlayerTags);
 
+    // Tag List
+    public File TagsList = new File(this.getDataFolder() + "/tagslist.yml");
+    public FileConfiguration tagListYML = YamlConfiguration.loadConfiguration(TagsList);
+
     // Database Settings (CLEANUP)
     public File dbsettings = new File(this.getDataFolder() + "/database.yml");
     public FileConfiguration dbyml = YamlConfiguration.loadConfiguration(dbsettings);
@@ -187,6 +191,8 @@ public class Main extends JavaPlugin {
         return tagsyml;
     }
 
+    public FileConfiguration getTagListYML() {return tagListYML;}
+
 
     public static List<ItemStack> tagslist = new ArrayList<>();
     // end of size stuff
@@ -197,7 +203,7 @@ public class Main extends JavaPlugin {
     public void applyTUI(Player player, Integer page) {
 
         player.closeInventory();
-        FileConfiguration config = this.getConfig();
+        FileConfiguration config = this.tagListYML;
 
         // BEGIN
         // TODO Maybe make the size static
