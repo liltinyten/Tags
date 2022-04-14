@@ -48,7 +48,7 @@ public class TagsCommand implements CommandExecutor {
             if (args.length == 0) {
                 if (player.hasPermission("tags.use") || player.isOp()) {
                     player.closeInventory();
-                    Main.getMainClass().applyTUI(player, 1);
+                    UserInterface.applyTUI(player, 1);
 
                 } else {
                     player.sendMessage(ChatColor.RED + "You don't have permission to use tags!");
@@ -106,7 +106,7 @@ public class TagsCommand implements CommandExecutor {
                 if (isNumeric(args[0]) && player.hasPermission("tags.use")) {
                     Integer pagenumber = Integer.parseInt(args[0]);
                     // send number into TUI method
-                    Main.getMainClass().applyTUI(player, pagenumber);
+                    UserInterface.applyTUI(player, pagenumber);
                 }
 
             }
