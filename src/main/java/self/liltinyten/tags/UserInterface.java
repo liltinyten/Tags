@@ -17,6 +17,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class UserInterface {
+    /*
+        TODO: Make it so that there is a page for buttons.
+     */
+
+
 
     public static void applyTUI(Player player, Integer page) {
 
@@ -25,7 +30,6 @@ public class UserInterface {
         Connection connection = Main.getConnection();
 
         // BEGIN
-        // TODO Maybe make the size static
         Inventory tui = Bukkit.createInventory(player, 54, ChatColor.translateAlternateColorCodes('&', "&aTags"));
         try {
             List<String> taglist = config.getStringList("tags");
