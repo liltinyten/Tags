@@ -48,7 +48,7 @@ public class TagsCommand implements CommandExecutor {
             if (args.length == 0) {
                 if (player.hasPermission("tags.use") || player.isOp()) {
                     player.closeInventory();
-                    Main.getMainClass().applyTUI(player, 1);
+                    UserInterface.applyTUI(player, 1);
 
                 } else {
                     player.sendMessage(ChatColor.RED + "You don't have permission to use tags!");
@@ -68,8 +68,8 @@ public class TagsCommand implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("list")) {
                     if (player.hasPermission("tags.list")) {
                         if (Main.getConnection() == null) {
-                            player.sendMessage(ChatColor.AQUA+"Showing list of "+ Main.getMainClass().getConfig().getStringList("tags").size() +" tags:");
-                            player.sendMessage(ChatColor.BLUE + Main.getMainClass().getConfig().getStringList("tags").toString());
+                            player.sendMessage(ChatColor.AQUA+"Showing list of "+ Main.getMainClass().tagListYML.getStringList("tags").size() +" tags:");
+                            player.sendMessage(ChatColor.BLUE + Main.getMainClass().tagListYML.getStringList("tags").toString());
                         } else {
 
                             try {
@@ -106,7 +106,7 @@ public class TagsCommand implements CommandExecutor {
                 if (isNumeric(args[0]) && player.hasPermission("tags.use")) {
                     Integer pagenumber = Integer.parseInt(args[0]);
                     // send number into TUI method
-                    Main.getMainClass().applyTUI(player, pagenumber);
+                    UserInterface.applyTUI(player, pagenumber);
                 }
 
             }
@@ -117,11 +117,11 @@ public class TagsCommand implements CommandExecutor {
 
                         String name = args[1];
                         if (Main.getConnection() == null) {
-                            List<String> tags = Main.getMainClass().getConfig().getStringList("tags");
+                            List<String> tags = Main.getMainClass().tagListYML.getStringList("tags");
                             if (tags.contains(name)) {
                                 tags.remove(name);
-                                Main.getMainClass().getConfig().set("tags", tags);
-                                Main.getMainClass().saveConfig();
+                                Main.getMainClass().tagListYML.set("tags", tags);
+                                Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
                                 player.sendMessage(ChatColor.GREEN+"You have successfully removed "+ChatColor.BLUE+name+ChatColor.GREEN+ " from tags!");
                             } else {
                                 player.sendMessage(ChatColor.RED+"Tag not found!");
@@ -159,22 +159,22 @@ public class TagsCommand implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("create")) {
                     if (player.hasPermission("tags.edit"))	{
                         String name = args[1];
-                        String argsArray[] = Arrays.copyOfRange(args, 2, args.length);
+                        String[] argsArray = Arrays.copyOfRange(args, 2, args.length);
                         String infoa = StringUtils.join(argsArray, " ");
                         String info = this.removeQuatations(infoa);
                         if (Main.getConnection() == null) {
-                            List<String> tags = Main.getMainClass().getConfig().getStringList("tags");
+                            List<String> tags = Main.getMainClass().tagListYML.getStringList("tags");
                             if (tags.contains(name)) {
-                                Main.getMainClass().getConfig().set(name, info);
-                                Main.getMainClass().getConfig().set("tags", tags);
-                                Main.getMainClass().saveConfig();
+                                Main.getMainClass().tagListYML.set(name, info);
+                                Main.getMainClass().tagListYML.set("tags", tags);
+                                Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
                                 player.sendMessage(ChatColor.GREEN + "Successfully edited tag "+ChatColor.BLUE+name+ChatColor.GREEN+"!");
                             } else {
 
-                                Main.getMainClass().getConfig().set(name, info);
+                                Main.getMainClass().tagListYML.set(name, info);
                                 tags.add(name);
-                                Main.getMainClass().getConfig().set("tags", tags);
-                                Main.getMainClass().saveConfig();
+                                Main.getMainClass().tagListYML.set("tags", tags);
+                                Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
                                 player.sendMessage(ChatColor.GREEN+"Successfully created tag "+ChatColor.BLUE+name+ChatColor.GREEN+"!");
                             }
                         } else {

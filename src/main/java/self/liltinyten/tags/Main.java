@@ -37,6 +37,10 @@ public class Main extends JavaPlugin {
     public File PlayerTags = new File(this.getDataFolder() + "/playertags.yml");
     public FileConfiguration tagsyml = YamlConfiguration.loadConfiguration(PlayerTags);
 
+    // Tag List
+    public File TagsList = new File(this.getDataFolder() + "/tagslist.yml");
+    public FileConfiguration tagListYML = YamlConfiguration.loadConfiguration(TagsList);
+
     // Database Settings (CLEANUP)
     public File dbsettings = new File(this.getDataFolder() + "/database.yml");
     public FileConfiguration dbyml = YamlConfiguration.loadConfiguration(dbsettings);
@@ -145,12 +149,12 @@ public class Main extends JavaPlugin {
 
     public void createDBYML() {
         if (!dbsettings.exists()) {
-            this.dbyml.set("usedatabase", (Object)false);
-            this.dbyml.set("host", (Object)"localhost");
-            this.dbyml.set("port", (Object)3306);
-            this.dbyml.set("databasename", (Object)"database");
-            this.dbyml.set("username", (Object)"root");
-            this.dbyml.set("password", (Object)"");
+            this.dbyml.set("usedatabase", false);
+            this.dbyml.set("host", "localhost");
+            this.dbyml.set("port", 3306);
+            this.dbyml.set("databasename", "database");
+            this.dbyml.set("username", "root");
+            this.dbyml.set("password", "");
             this.saveYml(this.dbyml, this.dbsettings);
         }
     }
@@ -187,124 +191,15 @@ public class Main extends JavaPlugin {
         return tagsyml;
     }
 
+    public FileConfiguration getTagListYML() {return tagListYML;}
+
 
     public static List<ItemStack> tagslist = new ArrayList<>();
     // end of size stuff
 
 
 
-    // Apply tags user interface
-    public void applyTUI(Player player, Integer page) {
-
-        player.closeInventory();
-        FileConfiguration config = this.getConfig();
-
-        // BEGIN
-        // TODO Maybe make the size static
-        Inventory tui = Bukkit.createInventory(player, 54, ChatColor.translateAlternateColorCodes('&', "&aTags"));
-        try {
-            List<String> taglist = config.getStringList("tags");
-            List<String> pagelist = new ArrayList<String>();
-            List<String> pagelistdb = new ArrayList<String>();
-            LinkedHashMap<String, String> pagemapdb = new LinkedHashMap<String, String>();
-
-            // Reset Button
-            ItemStack item = new ItemStack(Material.NAME_TAG);
-            ItemMeta meta = item.getItemMeta();
-            meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&4Reset"));
-            List<String> lore = new ArrayList<>();
-            lore.add("reset");
-            meta.setLore(lore);
-            item.setItemMeta(meta);
-            tui.setItem(0, item);
-
-            // Using config as storage
-            if (connection == null) {
-                for (String tag:taglist) {
-                    /*
-                     * IDEA
-                     * Make a for loop to loop through a specific index of tags
-                     * this will allow you to get the tags of that specific page
-                     */
-
-                    if ((taglist.indexOf(tag) <= 53 * page - 1) && (taglist.indexOf(tag) >= 53 * page - 53 ) ) {
-                        pagelist.add(tag);
-                    }
-                }
-                for (String ptag:pagelist) {
-                    // Create NameTag and meta
-                    ItemStack itemtag = new ItemStack(Material.NAME_TAG);
-                    ItemMeta itemmeta = itemtag.getItemMeta();
-                    // Set display name
-                    itemmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&r"+config.getString(ptag)));
-                    // Set Lore
-                    List<String> lores = new ArrayList<>();
-                    lores.add(ptag);
-                    if (!player.hasPermission("tags."+ptag)) {
-                        lores.add("No permission!");
-                    }
-                    itemmeta.setLore(lores);
-                    // Set Item's Meta
-                    itemtag.setItemMeta(itemmeta);
-                    // Set Item
-                    // TODO Integrate pages here
-                    tui.setItem(pagelist.indexOf(ptag)+1, itemtag);
-
-                }
-
-
-
-            } else {
-                // if database is present
-                try {
-                    // IDEA Use an if statement to check the row int of the getRow() function. If it's of a certain number then use it.
-
-
-
-                    ResultSet res = prepareStatement("SELECT * FROM TAGS;").executeQuery();
-                    while (res.next()) {
-                        String tag = res.getString("tag");
-                        String displayname = res.getString("displaytext");
-                        if ((res.getRow() <= 54 * page - 1) && (res.getRow() >= 54 * page - 54 ) ) {
-                            pagemapdb.put(tag, displayname);
-                        }
-                    }
-                    for (String ptag:pagemapdb.keySet()) {
-                        pagelistdb.add(ptag);
-                    }
-
-                    for (String ptag:pagelistdb) {
-                        ItemStack itemtag = new ItemStack(Material.NAME_TAG);
-                        ItemMeta itemmeta = itemtag.getItemMeta();
-                        // Set display name
-                        itemmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&r"+pagemapdb.get(ptag)));
-                        // Set Lore
-                        List<String> lores = new ArrayList<>();
-                        lores.add(ptag);
-                        if (!player.hasPermission("tags."+ptag)) {
-                            lores.add(ChatColor.RED + "No permission!");
-                        }
-                        itemmeta.setLore(lores);
-                        // Set Item's Meta
-                        itemtag.setItemMeta(itemmeta);
-                        // Set Item
-                        tagslist.add(itemtag);
-                        // TODO add pages here
-
-                        tui.setItem(pagelistdb.indexOf(ptag)+1, itemtag);
-                    }
-
-                } catch (SQLException s) {
-                    s.printStackTrace();
-                }
-
-            }
-        } catch (Exception e) {
-
-        }
-        player.openInventory(tui);
-
-    }
+    // TUI Main class -> UserInterface
 
 
 

@@ -1,8 +1,11 @@
 package self.liltinyten.tags;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -11,10 +14,35 @@ import com.google.common.collect.Lists;
 
 public class CommandCompleter implements TabCompleter {
 
+    public List<String> getAllTags() throws SQLException {
+        List<String> tags = Lists.newArrayList();
+
+        //TODO: Put something here to grab the tags from server storage or the database.
+        // Completed 8/5/22
+
+        // Get From Database
+        if (Main.getConnection() != null) {
+            ResultSet res = Main.prepareStatement("SELECT * FROM TAGS;").executeQuery();
+            while (res.next()) {
+                String tag = res.getString("tag");
+                tags.add(tag);
+            }
+
+        // Database is offline
+        } else {
+            return Main.getMainClass().getTagListYML().getStringList("tags");
+        }
+
+        return  tags;
+    }
+
+
+
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         // the list that contains the possible arguments
         List<String> arguments = Arrays.asList("reload", "remove", "create", "list", "help");
+
         List<String> completions = Lists.newArrayList();
 
         if (args.length == 1) {
@@ -24,6 +52,22 @@ public class CommandCompleter implements TabCompleter {
 
             }
             return completions;
+        }
+
+        if (args.length == 2) {
+            if (args[0].equals(arguments.get(0).toLowerCase())) {
+                try {
+                    List<String> temp = getAllTags();
+                    for (String s:temp) {
+                        if (s.toLowerCase().startsWith(args[1].toLowerCase())) {
+                            completions.add(s);
+                        }
+                    }
+                    return completions;
+                } catch (SQLException e) {
+                    System.out.println(ChatColor.RED + "[ERROR] " + ChatColor.WHITE + "[TAGS] - There was an error fetching tags completions!" );
+                }
+            }
         }
 
         return null;
