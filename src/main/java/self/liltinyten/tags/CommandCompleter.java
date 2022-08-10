@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -65,7 +66,7 @@ public class CommandCompleter implements TabCompleter {
                     }
                     return completions;
                 } catch (SQLException e) {
-                    System.out.println(ChatColor.RED + "[ERROR] " + ChatColor.WHITE + "[TAGS] - There was an error fetching tags completions!" );
+                    Main.getMainClass().logger.log(Level.WARNING, "There was an error fetching tab completions from database!");
                 }
             }
         }

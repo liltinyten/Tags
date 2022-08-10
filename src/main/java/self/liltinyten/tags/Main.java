@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -45,7 +47,10 @@ public class Main extends JavaPlugin {
     public File dbsettings = new File(this.getDataFolder() + "/database.yml");
     public FileConfiguration dbyml = YamlConfiguration.loadConfiguration(dbsettings);
 
-
+    //Logger
+    public Logger logger;
+    public static final String ERR = "\u001B[31m";
+    public static final String END = "\u001B[0m";
 
     private static Connection connection;
     private String host, database, username, password;
@@ -54,8 +59,10 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         // CLEANUP
+
+        logger = getLogger();
         setupChat();
-        System.out.println("[TAGS] - ENABLED");
+        logger.log(Level.INFO, "ENABLED");
         getServer().getPluginManager().registerEvents(new TagsMenuHandler(), this);
         getServer().getPluginManager().registerEvents(new TagHandler(), this);
         getCommand("tags").setExecutor(new TagsCommand());
@@ -82,7 +89,7 @@ public class Main extends JavaPlugin {
         // Database stuff
         // CLEANUP
         if (dbyml.getBoolean("usedatabase")) {
-            System.out.println("[TAGS] - Trying database connection...");
+            logger.log(Level.INFO, "[TAGS] - Trying database connection...");
             host = dbyml.getString("host");
             port = dbyml.getInt("port");
             database = dbyml.getString("databasename");
@@ -90,10 +97,10 @@ public class Main extends JavaPlugin {
             password = dbyml.getString("password");
             try {
                 openConnection();
-                System.out.println("[TAGS] - Connected!");
+                logger.log(Level.INFO, "Connected");
             } catch (SQLException e) {
 
-                getServer().getConsoleSender().sendMessage(ChatColor.RED + "[ERROR]" + ChatColor.WHITE + "[TAGS] - Connection error!");
+                logger.log(Level.SEVERE, ERR + "Connection Error!" + END);
             }
 
         } else {
@@ -220,8 +227,7 @@ public class Main extends JavaPlugin {
             }
         }
 
-
-        System.out.println("[TAGS] - DISABLED");
+        logger.log(Level.INFO, "DISABLED");
     }
 
     public void saveYml(FileConfiguration ymlConfig, File ymlFile) {
