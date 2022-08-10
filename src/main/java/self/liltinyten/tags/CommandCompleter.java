@@ -2,6 +2,7 @@ package self.liltinyten.tags;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,10 +23,9 @@ public class CommandCompleter implements TabCompleter {
 
         // Get From Database
         if (Main.getConnection() != null) {
-            ResultSet res = Main.prepareStatement("SELECT * FROM TAGS;").executeQuery();
+            ResultSet res = Main.getConnection().createStatement().executeQuery("SELECT TAG FROM TAGS");
             while (res.next()) {
-                String tag = res.getString("tag");
-                tags.add(tag);
+                tags.add(res.getString("tag"));
             }
 
         // Database is offline
@@ -55,7 +55,7 @@ public class CommandCompleter implements TabCompleter {
         }
 
         if (args.length == 2) {
-            if (args[0].equals(arguments.get(0).toLowerCase())) {
+            if (args[0].toLowerCase().startsWith("remove") || args[0].toLowerCase().startsWith("create")) {
                 try {
                     List<String> temp = getAllTags();
                     for (String s:temp) {
