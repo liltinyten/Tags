@@ -18,7 +18,8 @@ public class CommandCompleter implements TabCompleter {
     public List<String> getAllTags() throws SQLException {
         List<String> tags = Lists.newArrayList();
 
-        // Fixed
+        
+        // Fixed 8/10/22
 
         // Get From Database
         if (Main.getConnection() != null) {
@@ -42,7 +43,6 @@ public class CommandCompleter implements TabCompleter {
         // the list that contains the possible arguments
         List<String> arguments = Arrays.asList("reload", "remove", "create", "list", "help");
 
-        // The list to return
         List<String> completions = Lists.newArrayList();
 
         if (args.length == 1) {
@@ -57,8 +57,6 @@ public class CommandCompleter implements TabCompleter {
         if (args.length == 2) {
             if (args[0].toLowerCase().startsWith("remove") || args[0].toLowerCase().startsWith("create")) {
                 try {
-
-                    // The list with tag names
                     List<String> temp = getAllTags();
                     for (String s:temp) {
                         if (s.toLowerCase().startsWith(args[1].toLowerCase())) {
