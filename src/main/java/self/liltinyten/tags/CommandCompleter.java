@@ -18,8 +18,8 @@ public class CommandCompleter implements TabCompleter {
     public List<String> getAllTags() throws SQLException {
         List<String> tags = Lists.newArrayList();
 
-        //TODO: Put something here to grab the tags from server storage or the database.
-        // Completed 8/5/22
+        
+        // Fixed 8/10/22
 
         // Get From Database
         if (Main.getConnection() != null) {
