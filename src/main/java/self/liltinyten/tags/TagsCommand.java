@@ -103,10 +103,12 @@ public class TagsCommand implements CommandExecutor {
                  * Make a isNumeric function to check if the string can be converted into an integer. Afterwards, you
                  * need to make the tag inventory able to select the tags to include in the inventory.
                  */
-                if (isNumeric(args[0]) && player.hasPermission("tags.use")) {
+                if (isNumeric(args[0])  && player.hasPermission("tags.use")) {
                     Integer pagenumber = Integer.parseInt(args[0]);
                     // send number into TUI method
                     UserInterface.applyTUI(player, pagenumber);
+                } else {
+                    player.sendMessage( ChatColor.translateAlternateColorCodes('&', "&f[&aTAGS&f] &7- &c Tag page must be a positive number!"));
                 }
 
             }
