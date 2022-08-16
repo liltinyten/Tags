@@ -89,6 +89,14 @@ public class TagsMenuHandler implements Listener {
 
                 }
 
+                if (e.getCurrentItem().getType() == Material.EMERALD_BLOCK) {
+                    UserInterface.applyTUI(player, Integer.parseInt(e.getCurrentItem().getItemMeta().getLore().get(0)));
+                }
+
+                if (e.getCurrentItem().getType() == Material.REDSTONE_BLOCK) {
+                    UserInterface.applyTUI(player, Integer.parseInt(e.getCurrentItem().getItemMeta().getLore().get(0)));
+                }
+
             }
 
 
