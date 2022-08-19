@@ -81,7 +81,6 @@ public class TagsCommand implements CommandExecutor {
                                 player.sendMessage(ChatColor.AQUA+"Showing list of "+ list.size() +" tags:");
                                 player.sendMessage(ChatColor.BLUE + list.toString());
                             } catch (SQLException e) {
-                                // TODO Auto-generated catch block
                                 e.printStackTrace();
                             }
                         }
@@ -106,7 +105,16 @@ public class TagsCommand implements CommandExecutor {
                 if (isNumeric(args[0])  && player.hasPermission("tags.use")) {
                     Integer pagenumber = Integer.parseInt(args[0]);
                     // send number into TUI method
+
+
+                    if (pagenumber > 0 ) {
+                        UserInterface.applyTUI(player, pagenumber);
+                    } else {
+                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&f[&aTAGS&f] &7- &c Tag page must be a positive number!"));
+                    }
+
                     UserInterface.applyTUI(player, pagenumber);
+
                 } else {
                     player.sendMessage( ChatColor.translateAlternateColorCodes('&', "&f[&aTAGS&f] &7- &c Tag page must be a positive number!"));
                 }
@@ -142,7 +150,6 @@ public class TagsCommand implements CommandExecutor {
 
 
                             } catch (SQLException e) {
-                                // TODO Auto-generated catch block
                                 e.printStackTrace();
                             }
 

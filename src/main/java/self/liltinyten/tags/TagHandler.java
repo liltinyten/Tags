@@ -1,14 +1,15 @@
 package self.liltinyten.tags;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Objects;
-
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Objects;
+import java.util.logging.Level;
 
 public class TagHandler implements Listener {
 
@@ -50,7 +51,7 @@ public class TagHandler implements Listener {
                     }
                 }
             } catch (SQLException | NullPointerException e1) {
-                System.out.println("[TAGS] An error has occured!");
+                Main.getMainClass().logger.log(Level.SEVERE, Main.ERR +"An error has occurred!" + Main.END);
                 e1.printStackTrace();
             }
             // set contents

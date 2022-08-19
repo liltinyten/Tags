@@ -47,6 +47,29 @@ public class UserInterface {
             item.setItemMeta(meta);
             tui.setItem(0, item);
 
+            // Page Buttons
+            ItemStack nextButton = new ItemStack(Material.EMERALD_BLOCK);
+            ItemMeta nextMeta = nextButton.getItemMeta();
+            List<String> nextLore = new ArrayList<String>();
+            nextLore.add(ChatColor.GREEN + String.valueOf(page+1));
+            nextMeta.setLore(nextLore);
+            nextMeta.setDisplayName(ChatColor.GREEN + "Next");
+            nextButton.setItemMeta(nextMeta);
+            tui.setItem(54, nextButton);
+
+            if (page > 1) {
+                ItemStack backButton = new ItemStack(Material.REDSTONE_BLOCK);
+                ItemMeta backMeta = backButton.getItemMeta();
+                List<String> backLore = new ArrayList<String>();
+                backLore.add(ChatColor.RED + String.valueOf(page - 1));
+                backMeta.setLore(nextLore);
+                backMeta.setDisplayName(ChatColor.RED + "Next");
+                backButton.setItemMeta(nextMeta);
+                tui.setItem(45, backButton);
+            }
+
+            // Loading the tags
+
             // Using config as storage
             if (connection == null) {
                 for (String tag:taglist) {
@@ -56,7 +79,7 @@ public class UserInterface {
                      * this will allow you to get the tags of that specific page
                      */
 
-                    if ((taglist.indexOf(tag) <= 53 * page - 1) && (taglist.indexOf(tag) >= 53 * page - 53 ) ) {
+                    if ((taglist.indexOf(tag) <= 44 * page - 1) && (taglist.indexOf(tag) >= 44 * page - 44 ) ) {
                         pagelist.add(tag);
                     }
                 }
@@ -76,10 +99,12 @@ public class UserInterface {
                     // Set Item's Meta
                     itemtag.setItemMeta(itemmeta);
                     // Set Item
-                    // TODO Integrate pages here
                     tui.setItem(pagelist.indexOf(ptag)+1, itemtag);
 
                 }
+
+
+
 
 
 
@@ -94,7 +119,7 @@ public class UserInterface {
                     while (res.next()) {
                         String tag = res.getString("tag");
                         String displayname = res.getString("displaytext");
-                        if ((res.getRow() <= 54 * page - 1) && (res.getRow() >= 54 * page - 54 ) ) {
+                        if ((res.getRow() <= 44 * page - 1) && (res.getRow() >= 44 * page - 44 ) ) {
                             pagemapdb.put(tag, displayname);
                         }
                     }
@@ -118,8 +143,6 @@ public class UserInterface {
                         itemtag.setItemMeta(itemmeta);
                         // Set Item
                         Main.tagslist.add(itemtag);
-                        // TODO add pages here
-
                         tui.setItem(pagelistdb.indexOf(ptag)+1, itemtag);
                     }
 
