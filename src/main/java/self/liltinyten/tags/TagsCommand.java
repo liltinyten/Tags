@@ -106,11 +106,15 @@ public class TagsCommand implements CommandExecutor {
                     Integer pagenumber = Integer.parseInt(args[0]);
                     // send number into TUI method
 
+
                     if (pagenumber > 0 ) {
                         UserInterface.applyTUI(player, pagenumber);
                     } else {
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&f[&aTAGS&f] &7- &c Tag page must be a positive number!"));
                     }
+
+                    UserInterface.applyTUI(player, pagenumber);
+
                 } else {
                     player.sendMessage( ChatColor.translateAlternateColorCodes('&', "&f[&aTAGS&f] &7- &c Tag page must be a positive number!"));
                 }
