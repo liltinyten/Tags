@@ -18,6 +18,7 @@ import org.bukkit.plugin.Plugin;
 public class TagsCommand implements CommandExecutor {
     final Plugin plugin = Bukkit.getPluginManager().getPlugin("Tags");
 
+    // Removes quotes from strings
     private String removeQuatations(String string) {
         if (string.contains("\"")) {
             return string.replace('"', ' ');
@@ -26,13 +27,14 @@ public class TagsCommand implements CommandExecutor {
         }
     }
 
+
+    // Check if the string is a number
     public static boolean isNumeric(String strNum) {
         if (strNum == null) {
             return false;
         }
         try {
-            @SuppressWarnings("unused")
-            Integer d = Integer.parseInt(strNum);
+            Integer.parseInt(strNum);
         } catch (NumberFormatException nfe) {
             return false;
         }
@@ -45,6 +47,7 @@ public class TagsCommand implements CommandExecutor {
         if (sender instanceof Player) {
             Player player = (Player) sender;
 
+            //Menu Command
             if (args.length == 0) {
                 if (player.hasPermission("tags.use") || player.isOp()) {
                     player.closeInventory();
@@ -55,7 +58,10 @@ public class TagsCommand implements CommandExecutor {
                 }
 
             }
+
             if (args.length == 1) {
+
+                // Reload Command
                 if (args[0].equalsIgnoreCase("reload")) {
                     if (player.hasPermission("tags.reload")) {
                         Bukkit.getPluginManager().disablePlugin(plugin);
@@ -65,6 +71,7 @@ public class TagsCommand implements CommandExecutor {
 
                 }
 
+                //List COmmand
                 if (args[0].equalsIgnoreCase("list")) {
                     if (player.hasPermission("tags.list")) {
                         if (Main.getConnection() == null) {
@@ -87,6 +94,8 @@ public class TagsCommand implements CommandExecutor {
                     }
                 }
 
+                // Help Command
+                // TODO Don't use multiple sendMessage functions- use \n.
                 if (args[0].equalsIgnoreCase("help")) {
                     if (player.hasPermission("tags.help")) {
                         player.sendMessage(ChatColor.YELLOW + "/tags - shows the tags GUI!");
@@ -97,11 +106,9 @@ public class TagsCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.YELLOW + "/tags help - displays this list of commands!");
                     }
                 }
-                // create pages things here
-                /*
-                 * Make a isNumeric function to check if the string can be converted into an integer. Afterwards, you
-                 * need to make the tag inventory able to select the tags to include in the inventory.
-                 */
+
+
+                // Page Stuff
                 if (isNumeric(args[0])  && player.hasPermission("tags.use")) {
                     Integer pagenumber = Integer.parseInt(args[0]);
                     // send number into TUI method
@@ -118,6 +125,8 @@ public class TagsCommand implements CommandExecutor {
             }
 
             if (args.length == 2) {
+
+                // Tag Remove Command
                 if (args[0].equalsIgnoreCase("remove")) {
                     if (player.hasPermission("tags.edit")) {
 
@@ -161,6 +170,8 @@ public class TagsCommand implements CommandExecutor {
 
 
             if (args.length > 2) {
+
+                // Tag create command
                 if (args[0].equalsIgnoreCase("create")) {
                     if (player.hasPermission("tags.edit"))	{
                         String name = args[1];

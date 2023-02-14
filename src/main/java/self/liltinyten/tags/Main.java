@@ -49,6 +49,8 @@ public class Main extends JavaPlugin {
 
     //Logger
     public Logger logger;
+
+    // Colors
     public static final String ERR = "\u001B[31m";
     public static final String END = "\u001B[0m";
 
