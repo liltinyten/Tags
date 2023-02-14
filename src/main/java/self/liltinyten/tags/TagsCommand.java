@@ -113,10 +113,6 @@ public class TagsCommand implements CommandExecutor {
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&f[&aTAGS&f] &7- &c Tag page must be a positive number!"));
                     }
 
-                    UserInterface.applyTUI(player, pagenumber);
-
-                } else {
-                    player.sendMessage( ChatColor.translateAlternateColorCodes('&', "&f[&aTAGS&f] &7- &c Tag page must be a positive number!"));
                 }
 
             }

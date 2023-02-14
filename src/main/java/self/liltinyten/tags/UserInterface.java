@@ -51,20 +51,20 @@ public class UserInterface {
             ItemStack nextButton = new ItemStack(Material.EMERALD_BLOCK);
             ItemMeta nextMeta = nextButton.getItemMeta();
             List<String> nextLore = new ArrayList<String>();
-            nextLore.add(ChatColor.GREEN + String.valueOf(page+1));
+            nextLore.add(String.valueOf(page+1));
             nextMeta.setLore(nextLore);
             nextMeta.setDisplayName(ChatColor.GREEN + "Next");
             nextButton.setItemMeta(nextMeta);
-            tui.setItem(54, nextButton);
+            tui.setItem(53, nextButton);
 
             if (page > 1) {
                 ItemStack backButton = new ItemStack(Material.REDSTONE_BLOCK);
                 ItemMeta backMeta = backButton.getItemMeta();
                 List<String> backLore = new ArrayList<String>();
-                backLore.add(ChatColor.RED + String.valueOf(page - 1));
-                backMeta.setLore(nextLore);
-                backMeta.setDisplayName(ChatColor.RED + "Next");
-                backButton.setItemMeta(nextMeta);
+                backLore.add(String.valueOf(page - 1));
+                backMeta.setLore(backLore);
+                backMeta.setDisplayName(ChatColor.RED + "Back");
+                backButton.setItemMeta(backMeta);
                 tui.setItem(45, backButton);
             }
 
@@ -152,7 +152,7 @@ public class UserInterface {
 
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         player.openInventory(tui);
 
