@@ -17,11 +17,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class UserInterface {
-    /*
-        TODO: Make it so that there is a page for buttons.
-     */
-
-
 
     public static void applyTUI(Player player, Integer page) {
 
@@ -155,6 +150,12 @@ public class UserInterface {
             e.printStackTrace();
         }
         player.openInventory(tui);
+
+    }
+
+
+    public static void applyEUI(Player player, Player editPlayer) {
+        Inventory eui = Bukkit.createInventory(player, 54, "Editing tags for: "+editPlayer.getDisplayName());
 
     }
 

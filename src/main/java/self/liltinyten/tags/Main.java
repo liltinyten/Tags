@@ -43,6 +43,14 @@ public class Main extends JavaPlugin {
     public File TagsList = new File(this.getDataFolder() + "/tagslist.yml");
     public FileConfiguration tagListYML = YamlConfiguration.loadConfiguration(TagsList);
 
+    // Group Data
+    public File groupList = new File(this.getDataFolder() + "/groupList.yml");
+    public FileConfiguration groupListYML = YamlConfiguration.loadConfiguration(groupList);
+
+    //Permission Data
+    public File tagPermissionList = new File(this.getDataFolder() + "/playerPerms.yml");
+    public FileConfiguration tagPermissionListYML = YamlConfiguration.loadConfiguration(tagPermissionList);
+
     // Database Settings (CLEANUP)
     public File dbsettings = new File(this.getDataFolder() + "/database.yml");
     public FileConfiguration dbyml = YamlConfiguration.loadConfiguration(dbsettings);
@@ -72,6 +80,7 @@ public class Main extends JavaPlugin {
         this.saveDefaultConfig();
         this.reloadConfig();
         this.saveYml(tagsyml, PlayerTags);
+        this.saveYml(groupListYML, groupList);
 
 
         if (!dbsettings.exists()) {
@@ -184,14 +193,12 @@ public class Main extends JavaPlugin {
         return chat != null;
     }
 
+    // Getters
     public static Chat getChat() {
         return chat;
     }
 
-
-
-
-    // Getters
+    // File Getters
     public static  Main getMainClass() {
         return mainclass;
     }
@@ -202,13 +209,10 @@ public class Main extends JavaPlugin {
 
     public FileConfiguration getTagListYML() {return tagListYML;}
 
+    public FileConfiguration getGroupListYML() {return groupListYML;}
+
 
     public static List<ItemStack> tagslist = new ArrayList<>();
-    // end of size stuff
-
-
-
-    // TUI Main class -> UserInterface
 
 
 

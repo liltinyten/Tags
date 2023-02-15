@@ -1,5 +1,5 @@
 name: Tags
-version: 1.07
+version: 1.08-DEV
 main: self.liltinyten.tags.Main
 authors: [ liltinyten ]
 description: Allows you to set tags!

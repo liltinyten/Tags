@@ -1,0 +1,6 @@
+groups:
+  - "default"
+
+default:
+  - "Test1"
+  - "Test2"

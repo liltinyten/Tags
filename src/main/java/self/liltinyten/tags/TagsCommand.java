@@ -175,41 +175,123 @@ public class TagsCommand implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("create")) {
                     if (player.hasPermission("tags.edit"))	{
                         String name = args[1];
-                        String[] argsArray = Arrays.copyOfRange(args, 2, args.length);
-                        String infoa = StringUtils.join(argsArray, " ");
-                        String info = this.removeQuatations(infoa);
-                        if (Main.getConnection() == null) {
-                            List<String> tags = Main.getMainClass().tagListYML.getStringList("tags");
-                            if (tags.contains(name)) {
-                                Main.getMainClass().tagListYML.set(name, info);
-                                Main.getMainClass().tagListYML.set("tags", tags);
-                                Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
-                                player.sendMessage(ChatColor.GREEN + "Successfully edited tag "+ChatColor.BLUE+name+ChatColor.GREEN+"!");
-                            } else {
+                        if (name.contains(",") || name.equalsIgnoreCase("tags")) {
+                            String[] argsArray = Arrays.copyOfRange(args, 2, args.length);
+                            String infoa = StringUtils.join(argsArray, " ");
+                            String info = this.removeQuatations(infoa);
+                            if (Main.getConnection() == null) {
+                                List<String> tags = Main.getMainClass().tagListYML.getStringList("tags");
+                                if (tags.contains(name)) {
+                                    Main.getMainClass().tagListYML.set(name, info);
+                                    Main.getMainClass().tagListYML.set("tags", tags);
+                                    Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
+                                    player.sendMessage(ChatColor.GREEN + "Successfully edited tag " + ChatColor.BLUE + name + ChatColor.GREEN + "!");
+                                } else {
 
-                                Main.getMainClass().tagListYML.set(name, info);
-                                tags.add(name);
-                                Main.getMainClass().tagListYML.set("tags", tags);
-                                Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
-                                player.sendMessage(ChatColor.GREEN+"Successfully created tag "+ChatColor.BLUE+name+ChatColor.GREEN+"!");
+                                    Main.getMainClass().tagListYML.set(name, info);
+                                    tags.add(name);
+                                    Main.getMainClass().tagListYML.set("tags", tags);
+                                    Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
+                                    player.sendMessage(ChatColor.GREEN + "Successfully created tag " + ChatColor.BLUE + name + ChatColor.GREEN + "!");
+                                }
+                            } else {
+                                try {
+                                    ResultSet res = Main.prepareStatement("SELECT count(TAG) FROM TAGS WHERE tag = '" + name + "';").executeQuery();
+                                    res.next();
+                                    if (res.getInt(1) == 0) {
+                                        Main.prepareStatement("INSERT INTO `TAGS` (`TAG`, `DISPLAYTEXT`) VALUES ('" + name + "', '" + info + "');").executeUpdate();
+                                        player.sendMessage(ChatColor.GREEN + "Successfully created tag!");
+                                    } else if (res.getInt(1) != 0) {
+                                        Main.prepareStatement("UPDATE TAGS SET DISPLAYTEXT = '" + info + "' WHERE TAG = '" + name + "';").executeUpdate();
+                                        player.sendMessage(ChatColor.GREEN + "Successfully updated tag!");
+                                    }
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         } else {
-                            try {
-                                ResultSet res = Main.prepareStatement("SELECT count(TAG) FROM TAGS WHERE tag = '"+name+"';").executeQuery();
-                                res.next();
-                                if (res.getInt(1) == 0) {
-                                    Main.prepareStatement("INSERT INTO `TAGS` (`TAG`, `DISPLAYTEXT`) VALUES ('"+name+"', '"+info+"');").executeUpdate();
-                                    player.sendMessage(ChatColor.GREEN + "Successfully created tag!");
-                                } else if (res.getInt(1) != 0) {
-                                    Main.prepareStatement("UPDATE TAGS SET DISPLAYTEXT = '"+info+"' WHERE TAG = '"+name+"';").executeUpdate();
-                                    player.sendMessage(ChatColor.GREEN + "Successfully updated tag!");
-                                }
-                            } catch (SQLException e) {
-                                e.printStackTrace();
-                            }
+                            player.sendMessage(ChatColor.RED+ "Tag name cannot equal 'tags' or contain commas.");
                         }
                     } else {
-                        player.sendMessage(ChatColor.RED+"You don not have permission for this command!");
+                        player.sendMessage(ChatColor.RED+"You do not have permission for this command!");
+                    }
+                }
+            }
+
+            if (args.length >= 3) {
+                if (args[0].equalsIgnoreCase("group")) { // Check argument
+                    if (player.hasPermission("tags.edit")) { // Check permission
+
+                        if (args.length == 3) {
+                            if (args[1].equalsIgnoreCase("create")) { // Check which group command
+                                if (!args[2].equalsIgnoreCase("groups") || args[2].contains(",")) { // Check if group name is one of the config variables.
+                                    List<String> groupContent = new ArrayList<>(); // Placeholder info for the group.
+                                    List<String> groups = Main.getMainClass().groupListYML.getStringList("groups"); // List of groups from config.
+                                    if (!groups.contains(args[2])) { // Check if group Exists
+                                        groups.add(args[2]); // Add group to list.
+
+                                        Main.getMainClass().groupListYML.set("groups", groups); // Set in config.
+                                        Main.getMainClass().saveYml(Main.getMainClass().groupListYML, Main.getMainClass().groupList); // Save config.
+
+                                        Main.getMainClass().groupListYML.set(args[2], groupContent); // Set group in config.
+                                        Main.getMainClass().saveYml(Main.getMainClass().groupListYML, Main.getMainClass().groupList); // Save config
+
+                                        player.sendMessage(ChatColor.GREEN + "Successfully created group " + ChatColor.BLUE + args[2] + ChatColor.GREEN + "!");
+                                    } else {
+                                        player.sendMessage(ChatColor.RED + "This group already exists!");
+                                    }
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "Group name cannot be 'groups' or contain commas.");
+                                }
+                            }
+
+                            if (args[1].equalsIgnoreCase("remove")) {
+                                if (Main.getMainClass().groupListYML.getStringList("groups").contains(args[2])) { // If group exists.
+                                    List<String> groups = Main.getMainClass().groupListYML.getStringList("groups");
+                                    if (groups.contains(args[2])) {
+                                        groups.remove(args[2]);
+                                        Main.getMainClass().groupListYML.set("groups", groups); // Remove from group list.
+                                        Main.getMainClass().groupListYML.set(args[2], null); // Set to null.
+                                        Main.getMainClass().saveYml(Main.getMainClass().groupListYML, Main.getMainClass().groupList);
+                                        player.sendMessage(ChatColor.GREEN + "Successfully removed group " + ChatColor.BLUE + args[2] + ChatColor.GREEN + "!");
+                                    } else {
+                                        player.sendMessage(ChatColor.BLUE + args[2] + ChatColor.RED + " is not in group "+ChatColor.BLUE+args[1]+ChatColor.RED+"!");
+                                    }
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "This group does not exist!");
+                                }
+                            }
+                        }
+
+                        if (args.length == 4) {
+                            if (args[1].equalsIgnoreCase("add")) {
+                                List<String> tags = Main.getMainClass().tagListYML.getStringList("tags"); // Tag list
+                                List<String> groups = Main.getMainClass().groupListYML.getStringList("groups"); // Group List
+                                String groupName = args[2];
+                                String tagID = args[3];
+
+                                if (groups.contains(groupName)) { // Check if group exists in config.
+
+                                    List<String> selectedGroup = Main.getMainClass().groupListYML.getStringList(groupName); // Get the group.
+                                    if (tags.contains(tagID)) { // Check if tag exists.
+                                        if (!selectedGroup.contains(tagID)) { // Check if tag exists in group.
+                                            selectedGroup.add(tagID);
+                                            Main.getMainClass().groupListYML.set(groupName, selectedGroup); // Set the updated group in config.
+                                            Main.getMainClass().saveYml(Main.getMainClass().groupListYML, Main.getMainClass().groupList); // Save config.
+                                        } else {
+                                            player.sendMessage(ChatColor.RED + "This tag is already present in this group.");
+                                        }
+                                    } else {
+                                        player.sendMessage(ChatColor.RED + "This tag does not exist!");
+                                    }
+
+
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "This group does not exist!");
+                                }
+
+                            }
+                        }
                     }
                 }
             }

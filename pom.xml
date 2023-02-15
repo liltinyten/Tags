@@ -6,7 +6,7 @@
 
     <groupId>self.liltinyten</groupId>
     <artifactId>Tags</artifactId>
-    <version>1.06</version>
+    <version>1.08-DEV</version>
     <packaging>jar</packaging>
 
     <name>TagsTest</name>

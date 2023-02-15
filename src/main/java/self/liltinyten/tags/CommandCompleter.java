@@ -43,7 +43,7 @@ public class CommandCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
         // the list that contains the possible arguments
-        List<String> arguments = Arrays.asList("reload", "remove", "create", "list", "help");
+        List<String> arguments = Arrays.asList("reload", "remove", "create", "list", "help, group");
 
         // The list to return
         List<String> completions = Lists.newArrayList();
@@ -58,12 +58,12 @@ public class CommandCompleter implements TabCompleter {
         }
 
         if (args.length == 2) {
-            if (args[0].toLowerCase().startsWith("remove") || args[0].toLowerCase().startsWith("create")) {
+            if (args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("create")) {
                 try {
 
                     // The list with tag names
                     List<String> temp = getAllTags();
-                    for (String s:temp) {
+                    for (String s : temp) {
                         if (s.toLowerCase().startsWith(args[1].toLowerCase())) {
                             completions.add(s);
                         }
@@ -74,6 +74,45 @@ public class CommandCompleter implements TabCompleter {
                 }
             }
         }
+
+            if (args[0].equalsIgnoreCase("group")) {
+                if (args.length == 2) {
+                    List<String> secArgs = Arrays.asList("add", "create", "remove");
+                    for (String s:secArgs) {
+                        if (s.toLowerCase().startsWith(args[1].toLowerCase())) {
+                            completions.add(s);
+                        }
+                    }
+                    return completions;
+                }
+                if (args.length == 3) {
+                    List<String> groupNames = Main.getMainClass().getGroupListYML().getStringList("groups");
+                    for (String g:groupNames) {
+                        if (g.toLowerCase().startsWith(args[2].toLowerCase())) {
+                            completions.add(g);
+                        }
+                    }
+                    return completions;
+                }
+                if (args.length == 4) {
+                    try {
+
+                        // The list with tag names
+                        List<String> temp = getAllTags();
+                        for (String s:temp) {
+                            if (s.toLowerCase().startsWith(args[3].toLowerCase())) {
+                                completions.add(s);
+                            }
+                        }
+                        return completions;
+                    } catch (SQLException e) {
+                        Main.getMainClass().logger.log(Level.WARNING, "There was an error fetching tab completions from database!");
+                    }
+                }
+            }
+
+
+
 
         return null;
     }
