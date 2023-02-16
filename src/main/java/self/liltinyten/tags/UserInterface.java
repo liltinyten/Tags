@@ -28,9 +28,9 @@ public class UserInterface {
         Inventory tui = Bukkit.createInventory(player, 54, ChatColor.translateAlternateColorCodes('&', "&aTags"));
         try {
             List<String> taglist = config.getStringList("tags");
-            List<String> pagelist = new ArrayList<String>();
-            List<String> pagelistdb = new ArrayList<String>();
-            LinkedHashMap<String, String> pagemapdb = new LinkedHashMap<String, String>();
+            List<String> pagelist = new ArrayList<>();
+            List<String> pagelistdb = new ArrayList<>();
+            LinkedHashMap<String, String> pagemapdb = new LinkedHashMap<>();
 
             // Reset Button
             ItemStack item = new ItemStack(Material.NAME_TAG);
@@ -45,7 +45,7 @@ public class UserInterface {
             // Page Buttons
             ItemStack nextButton = new ItemStack(Material.EMERALD_BLOCK);
             ItemMeta nextMeta = nextButton.getItemMeta();
-            List<String> nextLore = new ArrayList<String>();
+            List<String> nextLore = new ArrayList<>();
             nextLore.add(String.valueOf(page+1));
             nextMeta.setLore(nextLore);
             nextMeta.setDisplayName(ChatColor.GREEN + "Next");
@@ -55,7 +55,7 @@ public class UserInterface {
             if (page > 1) {
                 ItemStack backButton = new ItemStack(Material.REDSTONE_BLOCK);
                 ItemMeta backMeta = backButton.getItemMeta();
-                List<String> backLore = new ArrayList<String>();
+                List<String> backLore = new ArrayList<>();
                 backLore.add(String.valueOf(page - 1));
                 backMeta.setLore(backLore);
                 backMeta.setDisplayName(ChatColor.RED + "Back");
@@ -118,9 +118,7 @@ public class UserInterface {
                             pagemapdb.put(tag, displayname);
                         }
                     }
-                    for (String ptag:pagemapdb.keySet()) {
-                        pagelistdb.add(ptag);
-                    }
+                    pagelistdb.addAll(pagemapdb.keySet());
 
                     for (String ptag:pagelistdb) {
                         ItemStack itemtag = new ItemStack(Material.NAME_TAG);
