@@ -95,15 +95,18 @@ public class TagsCommand implements CommandExecutor {
                 }
 
                 // Help Command
-                // TODO Don't use multiple sendMessage functions- use \n.
+                // TODO Don't use multiple sendMessage functions- use \n. Also, add the group commands.
                 if (args[0].equalsIgnoreCase("help")) {
                     if (player.hasPermission("tags.help")) {
+                        player.sendMessage(ChatColor.YELLOW
+                                +"/tags - shows the tags GUI!\n"
+                                +"/tags reload - reloads the Tags plugin!\n"
+                                +"/tags remove (tagname) - removes a tag!\n"
+                                +"/tags create (tagname) (displaytext) - creates a tag!\n"
+                                +"/tags list - shows a list of tags!\n"
+                                +"/tags help - displays this list of commands!n");
+                    } else {
                         player.sendMessage(ChatColor.YELLOW + "/tags - shows the tags GUI!");
-                        player.sendMessage(ChatColor.YELLOW + "/tags reload - reloads the Tags plugin!");
-                        player.sendMessage(ChatColor.YELLOW + "/tags remove (tagname) - removes a tag!");
-                        player.sendMessage(ChatColor.YELLOW + "/tags create (tagname) (displaytext) - creates a tag!");
-                        player.sendMessage(ChatColor.YELLOW + "/tags list - shows a list of tags!");
-                        player.sendMessage(ChatColor.YELLOW + "/tags help - displays this list of commands!");
                     }
                 }
 
@@ -175,7 +178,7 @@ public class TagsCommand implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("create")) {
                     if (player.hasPermission("tags.edit"))	{
                         String name = args[1];
-                        if (name.contains(",") || name.equalsIgnoreCase("tags")) {
+                        if (!name.contains(",") || name.toLowerCase() != ("tags")) {
                             String[] argsArray = Arrays.copyOfRange(args, 2, args.length);
                             String infoa = StringUtils.join(argsArray, " ");
                             String info = this.removeQuatations(infoa);

@@ -33,9 +33,9 @@ public class TagHandler implements Listener {
                         hastag.next();
                         if (hastag.getRow() != 0) {
                             if (!Main.getMainClass().getConfig().getBoolean("prefix")) {
-                                Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r " + hastag.getString("displaytext")));
+                                Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r" + hastag.getString("displaytext")));
                             } else {
-                                Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r " + hastag.getString("displaytext")));
+                                Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r" + hastag.getString("displaytext")));
                             }
                         } else {
                             Main.prepareStatement("UPDATE PLAYERTAGS SET TAG = 'reset' WHERE UUID = '"+player.getUniqueId()+"';").executeUpdate();
@@ -62,9 +62,9 @@ public class TagHandler implements Listener {
             if (Main.getMainClass().tagsyml.contains(player.getUniqueId().toString())) {
                 if (!Objects.equals(Main.getMainClass().getTagsYML().getString(player.getUniqueId().toString()), "reset")) {
                     if (!Main.getMainClass().getConfig().getBoolean("prefix")) {
-                        Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r " + Main.getMainClass().tagListYML.getString(Main.getMainClass().tagsyml.getString(player.getUniqueId().toString()))));
+                        Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r" + Main.getMainClass().tagListYML.getString(Main.getMainClass().tagsyml.getString(player.getUniqueId().toString()))));
                     } else {
-                        Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r " + Main.getMainClass().tagListYML.getString(Main.getMainClass().tagsyml.getString(player.getUniqueId().toString()))));
+                        Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r" + Main.getMainClass().tagListYML.getString(Main.getMainClass().tagsyml.getString(player.getUniqueId().toString()))));
                     }
                 } else {
                     // RESET CODE NO DATABASE
