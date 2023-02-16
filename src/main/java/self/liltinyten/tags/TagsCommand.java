@@ -95,7 +95,7 @@ public class TagsCommand implements CommandExecutor {
                 }
 
                 // Help Command
-                // TODO Don't use multiple sendMessage functions- use \n. Also, add the group commands.
+                // TODO Add the group commands.
                 if (args[0].equalsIgnoreCase("help")) {
                     if (player.hasPermission("tags.help")) {
                         player.sendMessage(ChatColor.YELLOW
