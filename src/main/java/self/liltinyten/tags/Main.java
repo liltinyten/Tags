@@ -115,8 +115,16 @@ public class Main extends JavaPlugin {
                         + "TAG VARCHAR(80) NOT NULL"
                         + ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin").executeUpdate();
                 prepareStatement("CREATE TABLE IF NOT EXISTS TAGS ("
-                        + "TAG VARCHAR(20) NOT NULL PRIMARY KEY,"
+                        + "TAG VARCHAR(50) NOT NULL PRIMARY KEY,"
                         + "DISPLAYTEXT VARCHAR(60) NOT NULL"
+                        + ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin").executeUpdate();
+                prepareStatement("CREATE TABLE IF NOT EXISTS GROUPS ("
+                        + "GROUPNAME VARCHAR(50) NOT NULL PRIMARY KEY,"
+                        + "TAGS VARCHAR(5000) NOT NULL"
+                        + ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin").executeUpdate();
+                prepareStatement("CREATE TABLE IF NOT EXISTS PERMISSIONS ("
+                        + "UUID VARCHAR(50) NOT NULL PRIMARY KEY,"
+                        + "PERMS VARCHAR(5000) NOT NULL"
                         + ") CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin").executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();

@@ -25,30 +25,36 @@ public class TagHandler implements Listener {
                 ResultSet rs = Main.prepareStatement("SELECT COUNT(*) FROM PLAYERTAGS WHERE UUID = '"+player.getUniqueId().toString()+"';").executeQuery();
                 rs.next();
                 if (rs.getRow() != 0) {
-                    ResultSet rs1 = Main.prepareStatement("SELECT * FROM PLAYERTAGS WHERE UUID = '"+player.getUniqueId().toString()+"';").executeQuery();
+                    ResultSet rs1 = Main.prepareStatement("SELECT * FROM PLAYERTAGS WHERE UUID = '" + player.getUniqueId().toString() + "';").executeQuery();
                     rs1.next();
-                    String tag = rs1.getString("tag");
-                    if (!(tag.equals("reset"))) {
-                        ResultSet hastag = Main.prepareStatement("SELECT * FROM TAGS WHERE TAG = '"+tag+"';").executeQuery();
-                        hastag.next();
-                        if (hastag.getRow() != 0) {
-                            if (!Main.getMainClass().getConfig().getBoolean("prefix")) {
-                                Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r" + hastag.getString("displaytext")));
+
+                    if (rs1.getRow() != 0) {
+                        String tag = rs1.getString("tag");
+                        if (!(tag.equals("reset"))) {
+                            ResultSet hastag = Main.prepareStatement("SELECT * FROM TAGS WHERE TAG = '" + tag + "';").executeQuery();
+                            hastag.next();
+                            if (hastag.getRow() != 0) {
+                                if (!Main.getMainClass().getConfig().getBoolean("prefix")) {
+                                    Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r" + hastag.getString("displaytext")));
+                                } else {
+                                    Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r" + hastag.getString("displaytext")));
+                                }
                             } else {
-                                Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r" + hastag.getString("displaytext")));
+                                Main.prepareStatement("UPDATE PLAYERTAGS SET TAG = 'reset' WHERE UUID = '" + player.getUniqueId() + "';").executeUpdate();
+
                             }
                         } else {
-                            Main.prepareStatement("UPDATE PLAYERTAGS SET TAG = 'reset' WHERE UUID = '"+player.getUniqueId()+"';").executeUpdate();
-
+                            // RESET CODE WITH DATABASE
+                            if (!Main.getMainClass().getConfig().getBoolean("prefix")) {
+                                Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r"));
+                            } else {
+                                Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r"));
+                            }
                         }
                     } else {
-                        // RESET CODE WITH DATABASE
-                        if (!Main.getMainClass().getConfig().getBoolean("prefix")) {
-                            Main.getChat().setPlayerSuffix(player, ChatColor.translateAlternateColorCodes('&', "&r"));
-                        } else {
-                            Main.getChat().setPlayerPrefix(player, ChatColor.translateAlternateColorCodes('&', "&r"));
-                        }
+                        Main.prepareStatement("UPDATE PLAYERTAGS SET TAG = 'reset' WHERE UUID = '" + player.getUniqueId() + "';").executeUpdate();
                     }
+
                 }
             } catch (SQLException | NullPointerException e1) {
                 Main.getMainClass().logger.log(Level.SEVERE, Main.ERR +"An error has occurred!" + Main.END);
