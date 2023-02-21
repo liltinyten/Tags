@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -105,7 +106,11 @@ public class TagsCommand implements CommandExecutor {
                                 +"/tags remove (tagname) - removes a tag!\n"
                                 +"/tags create (tagname) (displaytext) - creates a tag!\n"
                                 +"/tags list - shows a list of tags!\n"
-                                +"/tags help - displays this list of commands!n");
+                                +"/tags help - displays this list of commands!\n"
+                                +"/tags group create (groupname)\n"
+                                +"/tags group delete (groupname)\n"
+                                +"/tags group add (groupname) (tagname)\n"
+                                +"/tags group remove (groupname) (tagname)\n");
                     } else {
                         player.sendMessage(ChatColor.YELLOW + "/tags - shows the tags GUI!");
                     }
@@ -179,7 +184,7 @@ public class TagsCommand implements CommandExecutor {
                 if (args[0].equalsIgnoreCase("create")) {
                     if (player.hasPermission("tags.edit"))	{
                         String name = args[1];
-                        if (!name.contains(",") || name.toLowerCase() != ("tags")) {
+                        if (!name.contains("*") && name.toLowerCase() != ("tags")) {
                             String[] argsArray = Arrays.copyOfRange(args, 2, args.length);
                             String infoa = StringUtils.join(argsArray, " ");
                             String info = this.removeQuatations(infoa);
@@ -214,7 +219,7 @@ public class TagsCommand implements CommandExecutor {
                                 }
                             }
                         } else {
-                            player.sendMessage(ChatColor.RED+ "Tag name cannot equal 'tags' or contain commas.");
+                            player.sendMessage(ChatColor.RED+ "Tag name cannot equal 'tags' or contain asterisks.");
                         }
                     } else {
                         player.sendMessage(ChatColor.RED+"You do not have permission for this command!");
@@ -232,7 +237,7 @@ public class TagsCommand implements CommandExecutor {
 
                             // Group create command.
                             if (args[1].equalsIgnoreCase("create")) { // Check which group command
-                                if (!args[2].equalsIgnoreCase("groups") || args[2].contains(",")) { // Check if group name is one of the config variables.
+                                if (!args[2].equalsIgnoreCase("groups") && !args[2].contains("*")) { // Check if group name is one of the config variables.
 
                                     String name = args[2];
 
@@ -269,7 +274,7 @@ public class TagsCommand implements CommandExecutor {
                                         }
                                     }
                                 } else {
-                                    player.sendMessage(ChatColor.RED + "Group name cannot be 'groups' or contain commas.");
+                                    player.sendMessage(ChatColor.RED + "Group name cannot be 'groups' or contain asterisks.");
                                 }
                             }
 
@@ -475,7 +480,166 @@ public class TagsCommand implements CommandExecutor {
                         }
                     }
                 }
+
+                // USER STUFF
+                if (args[0].equalsIgnoreCase("user")) {
+
+                    if (Bukkit.getPlayerExact(args[1]) != null) {
+                        Player user = Bukkit.getPlayerExact(args[1]);
+
+                        if (args[2].equalsIgnoreCase("addTag")) {
+                            if (Main.getConnection() == null) {
+                                String tagId = args[3];
+                                // CONFIG
+                                if (Main.getMainClass().tagListYML.getStringList("tags").contains(tagId)) {
+                                    if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
+                                        // If the user already has a list of permissions.
+                                        List<String> permissions = Main.getMainClass().tagPermissionListYML.getStringList(user.getUniqueId().toString());
+                                        if (!permissions.contains(tagId)) {
+                                            permissions.add(tagId);
+                                            Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
+                                            Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
+                                            player.sendMessage(ChatColor.GREEN + "Successfully added tag to player!");
+                                        } else {
+                                            player.sendMessage(ChatColor.RED + "This user already has access to this tag!");
+                                        }
+
+
+                                    } else {
+                                        // If the user doesn't have a list of permissions.
+                                        ArrayList<String> permissions = new ArrayList<>();
+                                        permissions.add(tagId);
+                                        Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
+                                        Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
+                                        player.sendMessage(ChatColor.GREEN + "Successfully added tag to player!");
+
+
+                                    }
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "The specified tag does not exist!");
+                                }
+
+
+                            } else {
+                                // DATABASE
+
+                            }
+                        }
+
+                        if (args[2].equalsIgnoreCase("removeTag")) {
+                            if (Main.getConnection() == null) {
+                                String tagId = args[3];
+                                // CONFIG
+                                if (Main.getMainClass().tagListYML.getStringList("tags").contains(tagId)) {
+                                    if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
+                                        List<String> permissions = Main.getMainClass().tagPermissionListYML.getStringList(user.getUniqueId().toString());
+                                        if (permissions.contains(tagId)) {
+                                            permissions.remove(tagId);
+                                            Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
+                                            Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
+                                            player.sendMessage(ChatColor.GREEN + "Successfully removed tag from player!");
+                                        } else {
+                                            player.sendMessage(ChatColor.RED + "This user does not have permission for this tag.");
+                                        }
+
+                                    } else {
+                                        player.sendMessage(ChatColor.RED + "This user does not have permission for this tag.");
+                                    }
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "The specified tag does not exist!");
+                                }
+                            } else {
+                                // DATABASE
+
+                            }
+                        }
+
+                        if (args[2].equalsIgnoreCase("addGroup")) {
+                            if (Main.getConnection() == null) {
+                                String groupId = args[3];
+                                // CONFIG
+                                if (Main.getMainClass().groupListYML.getStringList("groups").contains(groupId)) {
+                                    if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
+                                        List<String> permissions = Main.getMainClass().tagPermissionListYML.getStringList(user.getUniqueId().toString());
+                                        if (!permissions.contains("*"+groupId)) {
+                                            permissions.add("*"+groupId);
+                                            Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
+                                            Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
+                                            player.sendMessage(ChatColor.GREEN + "Successfully added player to group!");
+
+                                        } else {
+                                            player.sendMessage(ChatColor.RED+"This player is already part of this group!");
+                                        }
+
+                                    } else {
+                                        ArrayList<String> permissions = new ArrayList<>();
+                                        permissions.add("*"+groupId);
+                                        Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
+                                        Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
+                                        player.sendMessage(ChatColor.GREEN + "Successfully added player to group!");
+
+                                    }
+
+
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "This group does not exist!");
+                                }
+
+
+                            } else {
+                                // DATABASE
+
+                            }
+                        }
+
+                        if (args[2].equalsIgnoreCase("removeGroup")) {
+                            if (Main.getConnection() == null) {
+                                String groupId = args[3];
+                                // CONFIG
+                                if (Main.getMainClass().groupListYML.getStringList("groups").contains(groupId)) {
+                                    if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
+                                        List<String> permissions = Main.getMainClass().tagPermissionListYML.getStringList(user.getUniqueId().toString());
+                                        if (permissions.contains("*"+groupId)) {
+                                            permissions.remove("*"+groupId);
+                                            Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
+                                            Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
+                                            player.sendMessage(ChatColor.GREEN + "Successfully removed player from group!");
+                                        } else {
+                                            player.sendMessage(ChatColor.RED+"This player is not part of this group!");
+                                        }
+
+                                    } else {
+                                        player.sendMessage(ChatColor.RED +" This user does not have permission for this group!");
+
+                                    }
+
+
+                                } else {
+                                    player.sendMessage(ChatColor.RED + "This group does not exist!");
+                                }
+
+                            } else {
+                                // DATABASE
+
+                            }
+                        }
+
+
+                    } else {
+                        player.sendMessage(ChatColor.RED + "The given player could not be found!");
+                    }
+
+
+
+
+
+
+                }
+
+
+
             }
+
 
 
 

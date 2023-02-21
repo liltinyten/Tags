@@ -4,11 +4,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.File;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,6 +33,8 @@ public class UserInterface {
             List<String> taglist = config.getStringList("tags");
             List<String> pagelist = new ArrayList<>();
             List<String> pagelistdb = new ArrayList<>();
+            FileConfiguration groupList = Main.getMainClass().groupListYML;
+            FileConfiguration permsList = Main.getMainClass().tagPermissionListYML;
             LinkedHashMap<String, String> pagemapdb = new LinkedHashMap<>();
 
             // Reset Button
@@ -67,17 +72,42 @@ public class UserInterface {
 
             // Using config as storage
             if (connection == null) {
-                for (String tag:taglist) {
-                    /*
-                     * IDEA
-                     * Make a for loop to loop through a specific index of tags
-                     * this will allow you to get the tags of that specific page
-                     */
 
-                    if ((taglist.indexOf(tag) <= 44 * page - 1) && (taglist.indexOf(tag) >= 44 * page - 44 ) ) {
+                List<String> permissions = new ArrayList<>();
+                ArrayList<String> userTags = new ArrayList<>();
+                if (permsList.contains(player.getUniqueId().toString())) {
+                    permissions = permsList.getStringList(player.getUniqueId().toString());
+                }
+
+                // Getting the tags the user has permission for.
+                for (String perm: permissions) {
+                    if (perm.startsWith("*")) {
+                        String groupId = perm.substring(1, perm.length());
+                        if (groupList.contains(groupId)) {
+                            if (!groupList.getStringList(groupId).isEmpty()) {
+                                for (String tag : groupList.getStringList(groupId)) {
+                                    if (!userTags.contains(tag)) {
+                                        userTags.add(tag);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        if (!userTags.contains(perm)) {
+                            userTags.add(perm);
+                        }
+                    }
+                }
+
+                // Getting the tags ready.
+                for (String tag:userTags) {
+                    if ((userTags.indexOf(tag) <= 44 * page - 1) && (userTags.indexOf(tag) >= 44 * page - 44 ) ) {
                         pagelist.add(tag);
                     }
                 }
+
+
+
                 for (String ptag:pagelist) {
                     // Create NameTag and meta
                     ItemStack itemtag = new ItemStack(Material.NAME_TAG);
