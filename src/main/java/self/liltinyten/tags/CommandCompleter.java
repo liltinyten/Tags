@@ -74,7 +74,7 @@ public class CommandCompleter implements TabCompleter {
 
             if (args[0].equalsIgnoreCase("group")) {
                 if (args.length == 2) {
-                    List<String> secArgs = Arrays.asList("add", "create", "remove");
+                    List<String> secArgs = Arrays.asList("add", "create", "delete", "remove");
                     for (String s:secArgs) {
                         if (s.toLowerCase().startsWith(args[1].toLowerCase())) {
                             completions.add(s);
@@ -83,6 +83,7 @@ public class CommandCompleter implements TabCompleter {
                     return completions;
                 }
                 if (args.length == 3) {
+                    // TODO ADD DATABASE INTEGRATION
                     List<String> groupNames = Main.getMainClass().getGroupListYML().getStringList("groups");
                     for (String g:groupNames) {
                         if (g.toLowerCase().startsWith(args[2].toLowerCase())) {
@@ -95,15 +96,36 @@ public class CommandCompleter implements TabCompleter {
                     try {
 
                         // The list with tag names
-                        List<String> temp = getAllTags();
-                        for (String s:temp) {
-                            if (s.toLowerCase().startsWith(args[3].toLowerCase())) {
-                                completions.add(s);
+                        if (args[2].equalsIgnoreCase("add")) {
+                            List<String> temp = getAllTags();
+                            for (String s : temp) {
+                                if (s.toLowerCase().startsWith(args[3].toLowerCase())) {
+                                    completions.add(s);
+                                }
                             }
                         }
+
                         return completions;
                     } catch (SQLException e) {
                         Main.getMainClass().logger.log(Level.WARNING, "There was an error fetching tab completions from database!");
+                    }
+                }
+            }
+
+            if (args[0].equalsIgnoreCase("user")) {
+                if (args.length == 3) {
+                    List<String> secArgs = Arrays.asList("addTag", "removeTag", "addGroup", "removeGroup");
+                    for (String s:secArgs) {
+                        if (s.toLowerCase().startsWith(args[2].toLowerCase())) {
+                            completions.add(s);
+                        }
+                    }
+                    return completions;
+                }
+
+                if (args.length == 4) {
+                    if (args[2].equalsIgnoreCase("addgroup")) {
+                        //TODO Not yet implemented.
                     }
                 }
             }

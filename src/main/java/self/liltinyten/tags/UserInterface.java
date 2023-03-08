@@ -138,16 +138,52 @@ public class UserInterface {
                 try {
                     // IDEA Use an if statement to check the row int of the getRow() function. If it's of a certain number then use it.
 
+                    // NOTICE --------------------------------------------------
 
-
-                    ResultSet res = Main.prepareStatement("SELECT * FROM TAGS;").executeQuery();
-                    while (res.next()) {
-                        String tag = res.getString("tag");
-                        String displayname = res.getString("displaytext");
-                        if ((res.getRow() <= 44 * page - 1) && (res.getRow() >= 44 * page - 44 ) ) {
-                            pagemapdb.put(tag, displayname);
+                    if (player.hasPermission("tags.all") || player.isOp()) {
+                        ResultSet res = Main.prepareStatement("SELECT * FROM TAGS;").executeQuery();
+                        while (res.next()) {
+                            String tag = res.getString("tag");
+                            String displayname = res.getString("displaytext");
+                            if ((res.getRow() <= 44 * page - 1) && (res.getRow() >= 44 * page - 44)) {
+                                pagemapdb.put(tag, displayname);
+                            }
+                        }
+                    } else {
+                        ArrayList<String> pagemapdbindex = new ArrayList<>();
+                        ResultSet res = Main.prepareStatement("SELECT PERMS FROM PERMISSIONS WHERE UUID = '"+player.getUniqueId().toString()+"';").executeQuery();
+                        res.next();
+                        if (res.getRow() != 0) {
+                            String[] permissions = res.getString("PERMS").split(" ");
+                            for (String perm:permissions) {
+                                if (perm.startsWith("*")) {
+                                    ResultSet groupRes = Main.prepareStatement("SELECT PERMS FROM GROUPS WHERE GROUPNAME = '"+perm.substring(1,perm.length())+"';").executeQuery();
+                                    groupRes.next();
+                                    if (groupRes.getRow() != 0) {
+                                        String[] groupTags = groupRes.getString("TAGS").split(" ");
+                                        for (String tag:groupTags) {
+                                            // TODO CHECK FUNCTIONALITY
+                                            ResultSet displayName = Main.prepareStatement("SELECT DISPLAYTEXT FROM TAGS WHERE TAG = '"+tag+"';").executeQuery();
+                                            displayName.next();
+                                            if (displayName.getRow() != 0) {
+                                                pagemapdb.putIfAbsent(tag, displayName.getString("displaytext"));
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // TODO CHECK FUNCTIONALITY
+                                    ResultSet displayName = Main.prepareStatement("SELECT DISPLAYTEXT FROM TAGS WHERE TAG = '"+perm+"';").executeQuery();
+                                    displayName.next();
+                                    if (displayName.getRow() != 0) {
+                                        pagemapdb.putIfAbsent(perm, displayName.getString("displaytext"));
+                                    }
+                                }
+                            }
                         }
                     }
+
+                    // NOTICE --------------------------------------------------
+
                     pagelistdb.addAll(pagemapdb.keySet());
 
                     for (String ptag:pagelistdb) {
@@ -168,6 +204,7 @@ public class UserInterface {
                         Main.tagslist.add(itemtag);
                         tui.setItem(pagelistdb.indexOf(ptag)+1, itemtag);
                     }
+
 
                 } catch (SQLException s) {
                     s.printStackTrace();

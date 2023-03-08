@@ -2,10 +2,7 @@ package self.liltinyten.tags;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -109,8 +106,12 @@ public class TagsCommand implements CommandExecutor {
                                 +"/tags help - displays this list of commands!\n"
                                 +"/tags group create (groupname)\n"
                                 +"/tags group delete (groupname)\n"
-                                +"/tags group add (groupname) (tagname)\n"
-                                +"/tags group remove (groupname) (tagname)\n");
+                                +"/tags group addtag (groupname) (tagname)\n"
+                                +"/tags group removetag (groupname) (tagname)\n"
+                                +"/tags user (username) addtag (tagname)\n"
+                                +"/tags user (username) removetag (tagname)\n"
+                                +"/tags user (username) addgroup (groupname)\n"
+                                +"/tags user (username) removegroup (groupname)\n");
                     } else {
                         player.sendMessage(ChatColor.YELLOW + "/tags - shows the tags GUI!");
                     }
@@ -135,7 +136,8 @@ public class TagsCommand implements CommandExecutor {
 
             if (args.length == 2) {
 
-                // Tag Remove Command
+                //NOTICE This is bugged see issue No. 13.
+                //Tag Remove Command
                 if (args[0].equalsIgnoreCase("remove")) {
                     if (player.hasPermission("tags.edit")) {
 
@@ -146,6 +148,45 @@ public class TagsCommand implements CommandExecutor {
                                 tags.remove(name);
                                 Main.getMainClass().tagListYML.set("tags", tags);
                                 Main.getMainClass().saveYml(Main.getMainClass().tagListYML, Main.getMainClass().TagsList);
+
+                                // Remove from group
+                                List<String> groups = Main.getMainClass().groupListYML.getStringList("groups");
+                                for (String group:groups) {
+                                    List<String> groupTags = Main.getMainClass().groupListYML.getStringList(group);
+                                    if (groupTags.contains(name)) {
+                                        groupTags.remove(name);
+                                        Main.getMainClass().groupListYML.set(group, groupTags);
+                                    }
+                                }
+                                Main.getMainClass().saveYml(Main.getMainClass().groupListYML, Main.getMainClass().groupList);
+
+
+                                // Remove from player permissions.
+                                {
+                                    Set<String> uuids = Main.getMainClass().tagPermissionListYML.getKeys(false);
+                                    for (String id : uuids) {
+                                            List<String> permissions = Main.getMainClass().tagPermissionListYML.getStringList(id);
+                                            if (permissions.contains(name)) {
+                                                permissions.remove(name);
+                                                Main.getMainClass().tagPermissionListYML.set(id, permissions);
+                                            }
+                                    }
+                                    Main.getMainClass().saveYml(Main.getMainClass().getTagListYML(), Main.getMainClass().tagPermissionList);
+                                }
+
+
+                                // Remove from current permissions.
+                                Set<String> uuids = Main.getMainClass().tagsyml.getKeys(false);
+                                for (String id: uuids) {
+                                    String currentPermission = Main.getMainClass().tagsyml.getString(id);
+                                    if (currentPermission == name) {
+                                        currentPermission = "reset";
+                                    }
+                                    Main.getMainClass().tagsyml.set(id, currentPermission);
+                                }
+                                Main.getMainClass().saveYml(Main.getMainClass().tagsyml, Main.getMainClass().PlayerTags);
+
+
                                 player.sendMessage(ChatColor.GREEN+"You have successfully removed "+ChatColor.BLUE+name+ChatColor.GREEN+ " from tags!");
                             } else {
                                 player.sendMessage(ChatColor.RED+"Tag not found!");
@@ -153,6 +194,7 @@ public class TagsCommand implements CommandExecutor {
                         } else {
 
                             try {
+                                // Removing Tag
                                 ResultSet res = Main.prepareStatement("SELECT count(*) FROM TAGS WHERE TAG = '"+name+"';").executeQuery();
                                 res.next();
                                 if (res.getRow() == 0) {
@@ -161,6 +203,26 @@ public class TagsCommand implements CommandExecutor {
                                     Main.prepareStatement("DELETE FROM TAGS WHERE TAGS.TAG = '"+ name +"';").executeUpdate();
                                     player.sendMessage(ChatColor.RED + "Tag removed!");
                                 }
+
+                                // Removing from group
+                                ResultSet groups = Main.prepareStatement("SELECT * FROM GROUPS WHERE TAGS LIKE '%"+name+"%';").executeQuery();
+                                while (groups.next()) {
+                                    if (groups.getRow() != 0) {
+                                        //TODO CHECK FUNCTIONALITY
+                                        Main.prepareStatement("UPDATE GROUPS SET '"+groups.getString("groupname")+"' = '' WHERE TAGS ="+groups.getString("tags")).executeUpdate();
+                                    }
+
+                                }
+
+
+                                /* TODO Remove the tag from any group that contains it and remove set any player who has the tag as their current
+                                    permission to "reset".
+                                 */
+
+
+
+
+
 
 
                             } catch (SQLException e) {
@@ -279,6 +341,7 @@ public class TagsCommand implements CommandExecutor {
                             }
 
 
+                            // NOTICE This is bugged see issue No. 13
                             // Group remove command
                             if (args[1].equalsIgnoreCase("delete")) {
 
@@ -488,8 +551,8 @@ public class TagsCommand implements CommandExecutor {
                         Player user = Bukkit.getPlayerExact(args[1]);
 
                         if (args[2].equalsIgnoreCase("addTag")) {
+                            String tagId = args[3];
                             if (Main.getConnection() == null) {
-                                String tagId = args[3];
                                 // CONFIG
                                 if (Main.getMainClass().tagListYML.getStringList("tags").contains(tagId)) {
                                     if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
@@ -511,7 +574,7 @@ public class TagsCommand implements CommandExecutor {
                                         permissions.add(tagId);
                                         Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
                                         Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
-                                        player.sendMessage(ChatColor.GREEN + "Successfully added tag to player!");
+                                        player.sendMessage(ChatColor.GREEN + "Successfully added tag to user!");
 
 
                                     }
@@ -523,12 +586,60 @@ public class TagsCommand implements CommandExecutor {
                             } else {
                                 // DATABASE
 
+                                try {
+                                    ResultSet res = Main.prepareStatement("SELECT TAG FROM TAGS WHERE TAG = '" + tagId + "';").executeQuery();
+                                    res.next();
+                                    if (res.getRow() != 0 ) {
+
+                                        ResultSet permissions = Main.prepareStatement("SELECT PERMS FROM PERMISSIONS WHERE UUID = '"+user.getUniqueId().toString()+"';").executeQuery();
+                                        permissions.next();
+                                        // If a permission set exists.
+                                        if (permissions.getRow() != 0) {
+                                            String rawPermissions = permissions.getString("PERMS");
+                                            String setPermssions = "";
+                                            String[] permissionSet = rawPermissions.split(" ");
+                                            ArrayList<String> permissionArray = new ArrayList<>();
+
+                                            for (String perm: permissionSet) {
+                                                permissionArray.add(perm);
+                                            }
+
+                                            if (!permissionArray.contains(tagId)) {
+                                                permissionArray.add(tagId);
+
+                                                for (String perm:permissionArray) {
+                                                    setPermssions += perm+" ";
+                                                }
+
+
+                                                Main.prepareStatement("UPDATE PERMISSIONS SET PERMS = '"+setPermssions+"' WHERE UUID = '"+user.getUniqueId().toString()+"';").executeUpdate();
+                                                player.sendMessage(ChatColor.GREEN + "Successfully added tag to user!");
+
+                                            } else {
+                                                player.sendMessage(ChatColor.RED + "This user already has permssion for this tag!");
+                                            }
+
+
+                                        } else {
+                                            Main.prepareStatement("INSERT INTO `PERMISSIONS` (`UUID`, `PERMS`) VALUES ('" + user.getUniqueId().toString() + "', '"+tagId+"');").executeUpdate();
+                                        }
+
+                                    } else {
+                                        player.sendMessage(ChatColor.RED+"This tag does not exist!");
+                                    }
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
+
+
                             }
                         }
 
                         if (args[2].equalsIgnoreCase("removeTag")) {
+                            String tagId = args[3];
+
                             if (Main.getConnection() == null) {
-                                String tagId = args[3];
                                 // CONFIG
                                 if (Main.getMainClass().tagListYML.getStringList("tags").contains(tagId)) {
                                     if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
@@ -551,12 +662,54 @@ public class TagsCommand implements CommandExecutor {
                             } else {
                                 // DATABASE
 
+                                try {
+                                    ResultSet res = Main.prepareStatement("SELECT TAG FROM TAGS WHERE TAG = '" + tagId + "';").executeQuery();
+                                    res.next();
+                                    if (res.getRow() != 0 ) {
+                                        ResultSet permissions = Main.prepareStatement("SELECT PERMS FROM PERMISSIONS WHERE UUID = '"+user.getUniqueId().toString()+"';").executeQuery();
+                                        permissions.next();
+                                        // If a permission set exists.
+                                        if (permissions.getRow() != 0) {
+                                            String rawPermissions = permissions.getString("PERMS");
+                                            String setPermssions = "";
+                                            String[] permissionSet = rawPermissions.split(" ");
+                                            ArrayList<String> permissionArray = new ArrayList<>();
+
+                                            for (String perm: permissionSet) {
+                                                permissionArray.add(perm);
+                                            }
+
+                                            if (permissionArray.contains(tagId)) {
+                                                permissionArray.remove(tagId);
+
+                                                for (String perm:permissionArray) {
+                                                    setPermssions += perm+" ";
+                                                }
+
+
+                                                Main.prepareStatement("UPDATE PERMISSIONS SET PERMS = '"+setPermssions+"' WHERE UUID = '"+user.getUniqueId().toString()+"';").executeUpdate();
+                                                player.sendMessage((ChatColor.GREEN + "Successfully removed tag from user!"));
+                                            } else {
+                                                player.sendMessage(ChatColor.RED + "This user does not have permssion for this tag!");
+                                            }
+
+
+                                        } else {
+                                            player.sendMessage(ChatColor.RED+"This user does not have permission for this tag!");
+                                        }
+
+                                    } else {
+                                        player.sendMessage(ChatColor.RED+"This tag does not exist!");
+                                    }
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
 
                         if (args[2].equalsIgnoreCase("addGroup")) {
+                            String groupId = args[3];
                             if (Main.getConnection() == null) {
-                                String groupId = args[3];
                                 // CONFIG
                                 if (Main.getMainClass().groupListYML.getStringList("groups").contains(groupId)) {
                                     if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
@@ -576,7 +729,7 @@ public class TagsCommand implements CommandExecutor {
                                         permissions.add("*"+groupId);
                                         Main.getMainClass().tagPermissionListYML.set(user.getUniqueId().toString(), permissions);
                                         Main.getMainClass().saveYml(Main.getMainClass().tagPermissionListYML, Main.getMainClass().tagPermissionList);
-                                        player.sendMessage(ChatColor.GREEN + "Successfully added player to group!");
+                                        player.sendMessage(ChatColor.GREEN + "Successfully added user to group!");
 
                                     }
 
@@ -589,12 +742,57 @@ public class TagsCommand implements CommandExecutor {
                             } else {
                                 // DATABASE
 
+                                try {
+                                        ResultSet res = Main.prepareStatement("SELECT TAGS FROM GROUPS WHERE GROUPNAME = '" + groupId + "';").executeQuery();
+                                        res.next();
+                                        if (res.getRow() != 0 ) {
+
+                                            ResultSet permissions = Main.prepareStatement("SELECT PERMS FROM PERMISSIONS WHERE UUID = '"+user.getUniqueId().toString()+"';").executeQuery();
+                                            permissions.next();
+                                            // If a permission set exists.
+                                            if (permissions.getRow() != 0) {
+                                                String rawPermissions = permissions.getString("PERMS");
+                                                String setPermssions = "";
+                                                String[] permissionSet = rawPermissions.split(" ");
+                                                ArrayList<String> permissionArray = new ArrayList<>();
+
+                                                for (String perm: permissionSet) {
+                                                    permissionArray.add(perm);
+                                                }
+
+                                                if (!permissionArray.contains("*"+groupId)) {
+                                                    permissionArray.add("*"+groupId);
+
+                                                    for (String perm:permissionArray) {
+                                                        setPermssions += perm+" ";
+                                                    }
+
+
+                                                    Main.prepareStatement("UPDATE PERMISSIONS SET PERMS = '"+setPermssions+"' WHERE UUID = '"+user.getUniqueId().toString()+"';").executeUpdate();
+                                                    player.sendMessage(ChatColor.GREEN + "Successfully added user to group!");
+                                                } else {
+                                                    player.sendMessage(ChatColor.RED + "This user already has permssion for this group!");
+                                                }
+
+
+                                            } else {
+                                                Main.prepareStatement("INSERT INTO `PERMISSIONS` (`UUID`, `PERMS`) VALUES ('" + user.getUniqueId().toString() + "', '"+"*"+groupId+"');").executeUpdate();
+                                            }
+
+                                        } else {
+                                            player.sendMessage(ChatColor.RED+"This group does not exist!");
+                                        }
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
+
                             }
                         }
 
                         if (args[2].equalsIgnoreCase("removeGroup")) {
+                            String groupId = args[3];
                             if (Main.getConnection() == null) {
-                                String groupId = args[3];
+
                                 // CONFIG
                                 if (Main.getMainClass().groupListYML.getStringList("groups").contains(groupId)) {
                                     if (Main.getMainClass().tagPermissionListYML.contains(user.getUniqueId().toString())) {
@@ -621,6 +819,50 @@ public class TagsCommand implements CommandExecutor {
                             } else {
                                 // DATABASE
 
+                                try {
+                                    ResultSet res = Main.prepareStatement("SELECT TAGS FROM GROUPS WHERE GROUPNAME = '" + groupId + "';").executeQuery();
+                                    res.next();
+                                    if (res.getRow() != 0 ) {
+
+                                        ResultSet permissions = Main.prepareStatement("SELECT PERMS FROM PERMISSIONS WHERE UUID = '"+user.getUniqueId().toString()+"';").executeQuery();
+                                        permissions.next();
+                                        // If a permission set exists.
+                                        if (permissions.getRow() != 0) {
+                                            String rawPermissions = permissions.getString("PERMS");
+                                            String setPermssions = "";
+                                            String[] permissionSet = rawPermissions.split(" ");
+                                            ArrayList<String> permissionArray = new ArrayList<>();
+
+                                            for (String perm: permissionSet) {
+                                                permissionArray.add(perm);
+                                            }
+
+                                            if (permissionArray.contains("*"+groupId)) {
+                                                permissionArray.remove("*"+groupId);
+
+                                                for (String perm:permissionArray) {
+                                                    setPermssions += perm+" ";
+                                                }
+
+
+                                                Main.prepareStatement("UPDATE PERMISSIONS SET PERMS = '"+setPermssions+"' WHERE UUID = '"+user.getUniqueId().toString()+"';").executeUpdate();
+                                                player.sendMessage(ChatColor.GREEN + "Successfully removed user from group!");
+                                            } else {
+                                                player.sendMessage(ChatColor.RED + "This user does not have permssion for this group!");
+                                            }
+
+
+                                        } else {
+                                            // No permissions for anything.
+                                            player.sendMessage(ChatColor.RED+"This user does not have permission for this group!");
+                                        }
+
+                                    } else {
+                                        player.sendMessage(ChatColor.RED+"This group does not exist!");
+                                    }
+                                } catch (SQLException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
 
